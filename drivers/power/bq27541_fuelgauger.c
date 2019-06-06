@@ -197,7 +197,8 @@ static int bq27541_battery_temperature(struct bq27541_device_info *di)
 {
 	int ret;
 	int temp = 0;
-	static int count = 0;
+	int error_temp;
+	static int count;
 
 	/* Add for get right soc when sleep long time */
 	if (atomic_read(&di->suspended) == 1)
@@ -220,7 +221,8 @@ static int bq27541_battery_temperature(struct bq27541_device_info *di)
 				 */
 				di->temp_pre =
 				-400 - ZERO_DEGREE_CELSIUS_IN_TENTH_KELVIN;
-				return -400;
+				error_temp = -400;
+				return error_temp;
 			} else {
 				return di->temp_pre +
 				ZERO_DEGREE_CELSIUS_IN_TENTH_KELVIN;
@@ -293,7 +295,7 @@ static int bq27541_i2c_txsubcmd(u8 reg, unsigned short subcmd,
 	return 0;
 }
 
-static bool bq27541_regist_done = false;
+static bool bq27541_regist_done;
 static bool check_4p4v_bat_present(struct bq27541_device_info *di)
 {
 	int flags = 0, ret = 0;
@@ -461,8 +463,8 @@ static int fg_soc_calibrate(struct bq27541_device_info *di, int soc)
 	union power_supply_propval ret = {0,};
 	unsigned int soc_calib;
 	unsigned long soc_current_time, time_last;
-	static bool first_enter = false;
-	static int charging_status, charging_status_pre = 0;
+	static bool first_enter;
+	static int charging_status, charging_status_pre;
 	bool chg_done;
 	int temp_region, vbat_mv, ibat_ma, soc_load, soc_temp, counter_temp = 0;
 
@@ -1180,9 +1182,11 @@ static ssize_t bq27541_write_stdcmd(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	ssize_t ret = strnlen(buf, PAGE_SIZE);
-	int cmd;
+	int cmd, rc;
 
-	sscanf(buf, "%x", &cmd);
+	rc = kstrtou32(buf, 0, &cmd);
+	if (rc != 1)
+		pr_err("%s,scanf error\n");
 	reg = cmd;
 	return ret;
 }
@@ -1221,16 +1225,18 @@ static ssize_t bq27541_write_subcmd(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	ssize_t ret = strnlen(buf, PAGE_SIZE);
-	int cmd;
+	int cmd, rc;
 
-	sscanf(buf, "%x", &cmd);
+	rc = kstrtou32(buf, 0, &cmd);
+	if (rc != 1)
+		pr_err("%s,scanf error\n");
 	subcmd = cmd;
 	return ret;
 }
 
-static DEVICE_ATTR(std_cmd, S_IRUGO|S_IWUGO, bq27541_read_stdcmd,
+static DEVICE_ATTR(std_cmd, 0644, bq27541_read_stdcmd,
 		bq27541_write_stdcmd);
-static DEVICE_ATTR(sub_cmd, S_IRUGO|S_IWUGO, bq27541_read_subcmd,
+static DEVICE_ATTR(sub_cmd, 0644, bq27541_read_subcmd,
 		bq27541_write_subcmd);
 static struct attribute *fs_attrs[] = {
 	&dev_attr_std_cmd.attr,
@@ -1306,7 +1312,6 @@ static int bq27541_battery_probe(struct i2c_client *client,
 
 	di = kzalloc(sizeof(*di), GFP_KERNEL);
 	if (!di) {
-		pr_err("failed to allocate device info data\n");
 		retval = -ENOMEM;
 		goto batt_failed_1;
 	}
@@ -1314,7 +1319,6 @@ static int bq27541_battery_probe(struct i2c_client *client,
 
 	bus = kzalloc(sizeof(*bus), GFP_KERNEL);
 	if (!bus) {
-		pr_err("failed to allocate access method data\n");
 		retval = -ENOMEM;
 		goto batt_failed_2;
 	}
@@ -1423,7 +1427,7 @@ static int bq27541_battery_suspend(struct i2c_client *client,
 }
 
 /* 1 minute */
-#define RESUME_TIME	1*60
+#define RESUME_TIME	60
 
 static int bq27541_battery_resume(struct i2c_client *client)
 {
@@ -1493,7 +1497,7 @@ static int __init bq27541_battery_init(void)
 
 	ret = i2c_add_driver(&bq27541_battery_driver);
 	if (ret)
-		printk(KERN_ERR "Unable to register BQ27541 driver\n");
+		pr_err("Unable to register BQ27541 driver\n");
 
 	return ret;
 }
