@@ -1,5 +1,4 @@
 /*****************************************************************************/
-
 /*
  *      devio.c  --  User space communication with USB devices.
  *
@@ -9,7 +8,7 @@
  *      it under the terms of the GNU General Public License as published by
  *      the Free Software Foundation; either version 2 of the License, or
  *      (at your option) any later version.
- *
+ *0
  *      This program is distributed in the hope that it will be useful,
  *      but WITHOUT ANY WARRANTY; without even the implied warranty of
  *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -1351,8 +1350,6 @@ static int proc_do_submiturb(struct usb_dev_state *ps, struct usbdevfs_urb *uurb
 			is_in = 0;
 			uurb->endpoint &= ~USB_DIR_IN;
 		}
-		if (is_in)
-			allow_short = true;
 		snoop(&ps->dev->dev, "control urb: bRequestType=%02x "
 			"bRequest=%02x wValue=%04x "
 			"wIndex=%04x wLength=%04x\n",
