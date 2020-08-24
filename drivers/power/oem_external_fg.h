@@ -79,7 +79,7 @@ struct notify_usb_enumeration_status {
 	int (*notify_usb_enumeration)(int status);
 };
 
-enum temp_region_type {
+typedef enum {
 	BATT_TEMP_COLD = 0,
 	BATT_TEMP_LITTLE_COLD,
 	BATT_TEMP_COOL,
@@ -89,7 +89,7 @@ enum temp_region_type {
 	BATT_TEMP_WARM,
 	BATT_TEMP_HOT,
 	BATT_TEMP_INVALID,
-};
+} temp_region_type;
 
 void regsister_notify_usb_enumeration_status(
 	struct notify_usb_enumeration_status *event);
@@ -113,13 +113,10 @@ extern int load_soc(void);
 extern void backup_soc_ex(int soc);
 extern void clean_backup_soc_ex(void);
 
-/* Remove Static & extern to qpnp-smbcharger.c */
-extern void switch_mode_to_normal(void);
-
 /* From oneplus_fastchg.c */
 extern void msm_cpuidle_set_sleep_disable(bool disable);
 
 /* add for dash adapter update */
-extern bool dash_adapter_update_is_tx_gpio(unsigned int gpio_num);
-extern bool dash_adapter_update_is_rx_gpio(unsigned int gpio_num);
+extern bool dash_adapter_update_is_tx_gpio(unsigned long gpio_num);
+extern bool dash_adapter_update_is_rx_gpio(unsigned long gpio_num);
 #endif
