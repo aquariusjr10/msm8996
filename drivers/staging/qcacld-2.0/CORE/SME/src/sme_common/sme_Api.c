@@ -13015,6 +13015,7 @@ static const char* sme_CBMode2String( tANI_U32 mode)
          return "Unknown";
    }
 }
+#endif
 
 /*
  * SME API to adjust bonding mode to regulatory, dfs nol .. etc.
