@@ -474,6 +474,7 @@ disp_en_gpio_err:
 //guozhiming modify for lcd 2015-10-15
 static int lcd_power_request_gpios(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
+<<<<<<< HEAD
 
 	int rc = 0;
 
@@ -505,6 +506,39 @@ int vendor_lcd_power_on(struct mdss_panel_data *pdata, int enable)
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 			panel_data);
 
+=======
+
+	int rc = 0;
+
+	rc = gpio_request(ctrl_pdata->lcd_power_1v8_en, "lcd_1v8_en");
+	if (rc) {
+		pr_err("request lcd 1v8 en gpio failed, rc=%d\n",
+				rc);
+		goto lcd_1v8_gpio_err;
+	 }
+	return rc;
+
+lcd_1v8_gpio_err:
+	if (gpio_is_valid(ctrl_pdata->lcd_power_1v8_en))
+			gpio_free(ctrl_pdata->lcd_power_1v8_en);
+	return rc;
+}
+
+int vendor_lcd_power_on(struct mdss_panel_data *pdata, int enable)
+{
+	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
+	struct mdss_panel_info *pinfo = NULL;
+	int rc = 0;
+
+	if (pdata == NULL) {
+		pr_err("%s: Invalid input data\n", __func__);
+		return -EINVAL;
+	}
+
+	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
+			panel_data);
+
+>>>>>>> 912ec28e65dfbb445f43ea67a607f6ef335e2b0f
 	if (!gpio_is_valid(ctrl_pdata->lcd_power_1v8_en)) {
 		pr_err("%s:%d, lcd 1v8 en line not configured\n",
 				__func__, __LINE__);

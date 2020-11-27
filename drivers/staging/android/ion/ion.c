@@ -1483,6 +1483,19 @@ static int ion_share_dma_buf_fd_nolock(struct ion_client *client,
 	return __ion_share_dma_buf_fd(client, handle, false);
 }
 
+static struct ion_handle *__ion_import_dma_buf(struct ion_client *client, 
+					       int fd, bool lock_client)
+{
+	return __ion_share_dma_buf_fd(client, handle, true);
+}
+EXPORT_SYMBOL(ion_share_dma_buf_fd);
+
+static int ion_share_dma_buf_fd_nolock(struct ion_client *client,
+				       struct ion_handle *handle)
+{
+	return __ion_share_dma_buf_fd(client, handle, false);
+}
+
 static struct ion_handle *__ion_import_dma_buf(struct ion_client *client,
 						int fd, bool lock_client)
 {
@@ -1491,47 +1504,35 @@ static struct ion_handle *__ion_import_dma_buf(struct ion_client *client,
         struct ion_handle *handle;
         int ret;
 
-        dmabuf = dma_buf_get(fd);
-        if (IS_ERR(dmabuf))
-                return ERR_CAST(dmabuf);
-        /* if this memory came from ion */
 
-        if (dmabuf->ops != &dma_buf_ops) {
-                pr_err("%s: can not import dmabuf from another exporter\n",
-                       __func__);
-                dma_buf_put(dmabuf);
-                return ERR_PTR(-EINVAL);
-        }
-        buffer = dmabuf->priv;
-
-        if (lock_client)
-		mutex_lock(&client->lock);
-        /* if a handle exists for this buffer just take a reference to it */
-        handle = ion_handle_lookup(client, buffer);
-        if (!IS_ERR(handle)) {
-                handle = ion_handle_get_check_overflow(handle);
-		if (lock_client)
-	                mutex_unlock(&client->lock);
-                goto end;
-        }
-
-        handle = ion_handle_create(client, buffer);
-        if (IS_ERR(handle)) {
-                if (lock_client)
-			mutex_unlock(&client->lock);
-                goto end;
-        }
-
-        ret = ion_handle_add(client, handle);
 	if (lock_client)
-	        mutex_unlock(&client->lock);
-        if (ret) {
+		mutex_lock(&client->lock);
+	/* if a handle exists for this buffer just take a reference to it */
+	handle = ion_handle_lookup(client, buffer);
+	if (!IS_ERR(handle)) {
+		handle = ion_handle_get_check_overflow(handle);
+		if (lock_client)
+			mutex_unlock(&client->lock);
+		goto end;
+	}
+
+	handle = ion_handle_create(client, buffer);
+	if (IS_ERR(handle)) {
+		if (lock_client)
+			mutex_unlock(&client->lock);
+		goto end;
+	}
+
+	ret = ion_handle_add(client, handle);
+	if (lock_client)
+		mutex_unlock(&client->lock);
+	if (ret) {
 		if (lock_client)
 			ion_handle_put(handle);
 		else
 			ion_handle_put_nolock(handle);
-                handle = ERR_PTR(ret);
-        }
+		handle = ERR_PTR(ret);
+	}
 
 end:
         dma_buf_put(dmabuf);
@@ -1542,11 +1543,16 @@ struct ion_handle *ion_import_dma_buf(struct ion_client *client, int fd)
 {
 	return __ion_import_dma_buf(client,fd,true);
 }
+
+struct ion_handle *ion_import_dma_buf(struct ion_client *client, int fd)
+{
+	return __ion_import_dma_buf(client,fd,true);
+}
 EXPORT_SYMBOL(ion_import_dma_buf);
 
 struct ion_handle *ion_import_dma_buf_nolock(struct ion_client *client, int fd)
 {
-        return __ion_import_dma_buf(client,fd,false);
+	return __ion_import_dma_buf(client,fd,false);
 }
 
 static int ion_sync_for_device(struct ion_client *client, int fd)

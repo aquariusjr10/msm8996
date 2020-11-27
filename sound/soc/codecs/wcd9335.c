@@ -14212,11 +14212,19 @@ static int tasha_codec_probe(struct snd_soc_codec *codec)
 	/*zhiguang.su@MultiMedia.AudioDrv, 2015-10-26, Modify for headset uevent*/
 	priv_headset_type = tasha;
 
+
+/*zhiguang.su@MultiMedia.AudioDrv, 2015-10-26, Modify for headset uevent*/
+   priv_headset_type = tasha;
+
 	return ret;
 
 err_pdata:
 	devm_kfree(codec->dev, ptr);
+<<<<<<< HEAD
 	/*zhiguang.su@MultiMedia.AudioDrv, 2015-10-26, Modify for headset uevent*/
+=======
+/*zhiguang.su@MultiMedia.AudioDrv, 2015-10-26, Modify for headset uevent*/
+>>>>>>> 912ec28e65dfbb445f43ea67a607f6ef335e2b0f
 	switch_dev_unregister(&tasha->mbhc.wcd9xxx_sdev);
 	err_switch_dev_register:
 err_hwdep:

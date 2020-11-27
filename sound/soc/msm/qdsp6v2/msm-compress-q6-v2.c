@@ -2969,7 +2969,8 @@ static int msm_compr_audio_effects_config_put(struct snd_kcontrol *kcontrol,
 	if (fe_id >= MSM_FRONTEND_DAI_MAX) {
 		pr_err("%s Received out of bounds fe_id %lu\n",
 			__func__, fe_id);
-		return -EINVAL;
+		ret = -EINVAL;
+		goto done;
 	}
 
 	mutex_lock(&pdata->lock);

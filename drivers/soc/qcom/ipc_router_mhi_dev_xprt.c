@@ -210,7 +210,6 @@ static void mhi_xprt_event_notifier(struct mhi_dev_client_cb_reason *reason)
 static void mhi_xprt_read_data(struct work_struct *work)
 {
 	struct sk_buff *skb;
-	struct rr_packet *in_pkt;
 	struct mhi_req mreq = {0};
 	int data_sz;
 	struct ipc_router_mhi_dev_xprt *mhi_xprtp =
@@ -287,7 +286,9 @@ static void mhi_xprt_read_data(struct work_struct *work)
 exit_free_skb:
 	kfree_skb(skb);
 exit_free_pkt:
-	release_pkt(in_pkt);
+	release_pkt(mhi_xprtp->in_pkt);
+	mhi_xprtp->in_pkt = NULL;
+	mhi_xprtp->bytes_to_rx = 0;
 }
 
 /**

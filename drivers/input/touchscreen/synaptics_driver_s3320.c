@@ -179,6 +179,7 @@ static int gesture_switch = 0;
 #endif
 
 /*********************for Debug LOG switch*******************/
+<<<<<<< HEAD
 #define TPD_ERR(a, arg...)  pr_debug(TPD_DEVICE ": " a, ##arg)
 #define TPDTM_DMESG(a, arg...)  pr_debug(TPD_DEVICE ": " a, ##arg)
 
@@ -187,6 +188,16 @@ static int gesture_switch = 0;
 		if (tp_debug)\
 		pr_debug(TPD_DEVICE ": " a, ##arg);\
 	} while (0)
+=======
+#define TPD_ERR(a, arg...)  pr_err(TPD_DEVICE ": " a, ##arg)
+#define TPDTM_DMESG(a, arg...)  printk(TPD_DEVICE ": " a, ##arg)
+
+#define TPD_DEBUG(a,arg...)\
+	do{\
+		if(tp_debug)\
+		pr_err(TPD_DEVICE ": " a,##arg);\
+	}while(0)
+>>>>>>> 912ec28e65dfbb445f43ea67a607f6ef335e2b0f
 
 /*---------------------------------------------Global Variable----------------------------------------------*/
 static int baseline_ret = 0;
@@ -1298,6 +1309,10 @@ Left2RightSwip:%d Right2LeftSwip:%d Up2DownSwip:%d Down2UpSwip:%d\n",
 }
 #endif
 /***************end****************/
+<<<<<<< HEAD
+=======
+static char prlog_count = 0;
+>>>>>>> 912ec28e65dfbb445f43ea67a607f6ef335e2b0f
 #ifdef REPORT_2D_PRESSURE
 static unsigned char pres_value = 1;
 #endif
@@ -1429,7 +1444,14 @@ uint8_t int_touch(void)
 
 	last_status = current_status & 0x02;
 
+<<<<<<< HEAD
 	if (finger_num == 0/* && last_status && (check_key <= 1)*/) {
+=======
+	if (finger_num == 0/* && last_status && (check_key <= 1)*/)
+	{
+		if (3 == (++prlog_count % 6))
+			TPD_ERR("all finger up\n");
+>>>>>>> 912ec28e65dfbb445f43ea67a607f6ef335e2b0f
 		input_report_key(ts->input_dev, BTN_TOOL_FINGER, 0);
 #ifndef TYPE_B_PROTOCOL
 		input_mt_sync(ts->input_dev);

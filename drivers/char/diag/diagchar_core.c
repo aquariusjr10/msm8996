@@ -3170,21 +3170,18 @@ exit:
 				DIAG_LOG(DIAG_DEBUG_DCI,
 				"diag: valid task doesn't exist for pid = %d\n",
 				entry->tgid);
-				put_pid(pid_struct);
 				continue;
 			}
-			if (task_s == entry->client) {
-				if (entry->client->tgid != current->tgid) {
-					put_task_struct(task_s);
-					put_pid(pid_struct);
+			if (task_s == entry->client)
+				if (entry->client->tgid != current->tgid)
 					continue;
-				}
+			if (!entry->in_service)
+			continue;
+			if (copy_to_user(buf + ret, &data_type, sizeof(int))) {
+				mutex_unlock(&driver->dci_mutex);
+				goto end;
 			}
-			if (!entry->in_service) {
-				put_task_struct(task_s);
-				put_pid(pid_struct);
-				continue;
-			}
+			
 			if (copy_to_user(buf + ret, &data_type, sizeof(int))) {
 				put_task_struct(task_s);
 				put_pid(pid_struct);
